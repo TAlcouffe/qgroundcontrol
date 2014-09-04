@@ -34,37 +34,52 @@ public slots:
     void selectDropDownMenuSystem(int dropdownid);
     /** @Brief Select a component through the drop down menu */
     void selectDropDownMenuComponent(int dropdownid);
-
-    void rateTreeItemChanged(QTreeWidgetItem* paramItem, int column);
+	
+	void activateStream(QTreeWidgetItem* item, int col);
+	void sendStreamButton();
 
 protected:
-    MAVLinkProtocol *_protocol;     ///< MAVLink instance
     int selectedSystemID;          ///< Currently selected system
     int selectedComponentID;       ///< Currently selected component
-    QMap<int, int> systems;     ///< Already observed systems
-    QMap<int, int> components; ///< Already observed components
-    QMap<int, quint64> lastMessageUpdate; ///< Used to switch between highlight and non-highlighting color
-    QMap<int, float> messagesHz; ///< Used to store update rate in Hz
-    QMap<int, float> onboardMessageInterval; ///< Stores the onboard selected data rate
-    QMap<int, unsigned int> messageCount; ///< Used to store the message count
-    mavlink_message_t receivedMessages[256]; ///< Available / known messages
-    QMap<int, QTreeWidgetItem*> treeWidgetItems;   ///< Available tree widget items
-    QMap<int, QTreeWidgetItem*> rateTreeWidgetItems; ///< Available rate tree widget items
-    QTimer updateTimer; ///< Only update at 1 Hz to not overload the GUI
+    //QMap<int, quint64> lastMessageUpdate; ///< Used to switch between highlight and non-highlighting color
+    //QMap<int, float> messagesHz; ///< Used to store update rate in Hz
+    //QMap<int, unsigned int> messageCount; ///< Used to store the message count
+    //mavlink_message_t receivedMessages[256]; ///< Available / known messages
+    //QMap<int, QTreeWidgetItem*> treeWidgetItems;   ///< Available tree widget items
+
+	QMap<QTreeWidgetItem*,int> widgetTreeItems;  ///< Available msgid tree items
+	//QMap<int, QTreeWidgetItem*>* msgTreeItems; ///< Available tree items msgid
+
+	QMap<int, QTreeWidgetItem* > uasTreeWidgetItems; ///< Tree of available uas
+	QMap<int, QMap<int, QTreeWidgetItem*>* > uasMsgTreeItems; 
+	QMap<QTreeWidgetItem*,int> msgUasTreeItems;
+
+	QMap<int, mavlink_message_t* > uasMavlinkStorage;
+	QMap<int, QMap<int, float>* > uasMessageHz;
+	QMap<int, QMap<int, unsigned int>* > uasMessageCount;
+
+	QMap<int, QMap<int, quint64>* > uasLastMessageUpdate;
+
+	QTimer updateTimer; ///< Only update at 1 Hz to not overload the GUI
     mavlink_message_info_t messageInfo[256]; // Store the metadata for all available MAVLink messages.
 
     // Update one message field
-    void updateField(int msgid, int fieldid, QTreeWidgetItem* item);
+    void updateField(int sysid, int msgid, int fieldid, QTreeWidgetItem* item);
     /** @brief Rebuild the list of components */
     void rebuildComponentList();
-    /** @brief Change the stream interval */
-    void changeStreamInterval(int msgid, int interval);
+
+	void addUAStoTree(int sysId);
+	QTreeWidgetItem* findParentWidgetForStream(int sysId, int msgId, QString messageName);
+	QTreeWidgetItem* findChildWidgetForStream(QTreeWidgetItem* parentItem, int msgId);
 
     static const unsigned int updateInterval;
     static const float updateHzLowpass;
 
+	MAVLinkProtocol* mavlink_protocol;
+
 private:
     Ui::QGCMAVLinkInspector *ui;
+
 };
 
 #endif // QGCMAVLINKINSPECTOR_H
