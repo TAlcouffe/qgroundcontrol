@@ -79,6 +79,7 @@ protected:
 
 private:
     Ui::QGCMAVLinkInspector *ui;
+    bool uasCreated;
 
 };
 

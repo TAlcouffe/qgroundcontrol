@@ -16,7 +16,11 @@ QGCMAVLinkInspector::QGCMAVLinkInspector(MAVLinkProtocol* protocol, QWidget *par
     selectedComponentID(0),
     ui(new Ui::QGCMAVLinkInspector)
 {
+	qDebug() << "Begining init MAVLinkInspector";
+
     ui->setupUi(this);
+
+	uasCreated = false;
 
     // Make sure "All" is an option for both the system and components
     ui->systemComboBox->addItem(tr("All"), 0);
@@ -58,10 +62,13 @@ QGCMAVLinkInspector::QGCMAVLinkInspector(MAVLinkProtocol* protocol, QWidget *par
 
 	connect(ui->sendStreamButton,SIGNAL(clicked()),this,SLOT(sendStreamButton()));
 
+	qDebug() << "End init MAVLinkInspector";
 }
 
 void QGCMAVLinkInspector::addSystem(UASInterface* uas)
 {
+	qDebug() << "UAS created";
+	uasCreated = true;
     ui->systemComboBox->addItem(uas->getUASName(), uas->getUASID());
 }
 
@@ -471,6 +478,11 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 	// Only overwrite if system filter is set
 	quint64 receiveTime;
 
+	if (!uasCreated)
+	{
+		return;
+	}
+
 	if(!uasMavlinkStorage.contains(message.sysid))
 	{
 		mavlink_message_t* msg = new mavlink_message_t[256];
@@ -478,7 +490,6 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 		uasMavlinkStorage.insert(message.sysid,msg);
 
 		addUAStoTree(message.sysid);
-
 	}
 
 	memcpy(uasMavlinkStorage.value(message.sysid)+message.msgid,&message,sizeof(mavlink_message_t));
@@ -488,27 +499,23 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 	bool msgFound = false;
 	QMap<int, quint64>* lastMessagesUpdate;
 	QMap<int, QMap<int, quint64>* >::const_iterator ite = uasLastMessageUpdate.find(message.sysid);
-	//int loopCountIte = 0;
 	while((ite != uasLastMessageUpdate.end()) && (ite.key() == message.sysid))
 	{		
 		if(ite.value()->contains(message.msgid))
 		{
 			QMap<int, quint64>::const_iterator iterMap = ite.value()->find(message.msgid);
 			int keyMsgid = iterMap.key();
-			//qDebug() << "if condition lastMessageUpdate:" << QString::number(message.sysid) << "-" << QString::number(ite.value()->contains(message.msgid)) << "-" << QString::number(keyMsgid) << QString::number(message.msgid) << "-" << QString::number(loopCountIte) << QString::number(uasLastMessageUpdate.size());
 
 			msgFound = true;
 			lastMessagesUpdate = ite.value();
 			break;
 		}
 		++ite;
-		//++loopCountIte;
 	}
 
 	receiveTime = QGC::groundTimeMilliseconds();
 	if(!msgFound)
 	{
-		qDebug() << "Adding new message with msgid " << QString::number(message.msgid); 
 		QMap<int, float>* messageHz = new QMap<int,float>;
 		messageHz->insert(message.msgid,0.0f);
 		uasMessageHz.insertMulti(message.sysid,messageHz);
@@ -524,7 +531,7 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 
 		msgFound = true;
 	}
-	if(msgFound)//(lastMessagesUpdate)
+	if(msgFound)
 	{
 
 		if ((lastMessagesUpdate->contains(message.msgid))&&(uasMessageCount.contains(message.sysid)))
@@ -533,7 +540,6 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 			unsigned int count = 0;
 			QMap<int, unsigned int> * uasMsgCount;
 			QMap<int, QMap<int, unsigned int>* >::const_iterator iter = uasMessageCount.find(message.sysid);
-			//int loopCountIter = 0;
 			while((iter != uasMessageCount.end()) && (iter.key() == message.sysid))
 			{
 
@@ -541,17 +547,14 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 				{
 					QMap<int, unsigned int>::const_iterator iterMsgID = iter.value()->find(message.msgid);
 					int keyMsgID = iterMsgID.key();
-					//qDebug() << "if condition msg received:" << QString::number(message.sysid) << "-" << QString::number(iter.value()->contains(message.msgid)) << "-" << QString::number(keyMsgID) << QString::number(message.msgid) << "-" << QString::number(loopCountIter) << QString::number(uasMessageCount.size());
 
 					countFound= true;
 					uasMsgCount = iter.value();
 					count = uasMsgCount->value(message.msgid,0);
 					uasMsgCount->insert(message.msgid,count+1);
-					//qDebug() << "count for loop:" << QString::number(message.sysid) << "-" << QString::number(message.msgid) << "-" << QString::number(count);
 					break;
 				}
 				++iter;
-				//++loopCountIter;
 			}
 		}
 		lastMessagesUpdate->insert(message.msgid,receiveTime);
@@ -567,8 +570,6 @@ void QGCMAVLinkInspector::updateField(int sysid, int msgid, int fieldid, QTreeWi
 {
     // Add field tree widget item
     item->setData(0, Qt::DisplayRole, QVariant(messageInfo[msgid].fields[fieldid].name));
-    
-	//uint8_t* m = ((uint8_t*)(receivedMessages+msgid))+8;
 
 	uint8_t* m = ((uint8_t*)(uasMavlinkStorage.value(sysid)+msgid))+8;
 
