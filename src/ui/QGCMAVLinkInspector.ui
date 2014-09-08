@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>658</width>
-    <height>300</height>
+    <width>400</width>
+    <height>367</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="2,8,2,8,3">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="2,0,0,0,0">
    <property name="leftMargin">
     <number>6</number>
    </property>
@@ -40,6 +40,12 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="3">
+    <widget class="QComboBox" name="componentComboBox"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="systemComboBox"/>
+   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -47,8 +53,14 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="5">
+   <item row="6" column="0" rowspan="2" colspan="5">
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <column>
       <property name="text">
        <string notr="true">1</string>
@@ -56,20 +68,39 @@
      </column>
     </widget>
    </item>
-   <item row="3" column="0" colspan="5">
-    <widget class="QTreeWidget" name="rateTreeWidget">
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
+   <item row="1" column="0" colspan="2">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Get all possible streams</string>
+     </property>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QComboBox" name="systemComboBox"/>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="sendStreamButton">
+     <property name="text">
+      <string>Get</string>
+     </property>
+    </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="QComboBox" name="componentComboBox"/>
+   <item row="1" column="4">
+    <widget class="QDoubleSpinBox" name="frequencySpinBox">
+     <property name="minimum">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.500000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>New Frequency</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
