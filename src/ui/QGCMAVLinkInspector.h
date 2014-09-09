@@ -39,6 +39,9 @@ public slots:
 
     void rateTreeItemChanged(QTreeWidgetItem* paramItem, int column);
 
+    void activateStream(QTreeWidgetItem* item, int col);
+    void sendStreamButton();
+
 protected:
     MAVLinkProtocol *_protocol;     ///< MAVLink instance
     int selectedSystemID;          ///< Currently selected system
@@ -74,9 +77,6 @@ protected:
     QTreeWidgetItem* findParentWidgetForStream(int sysId, int msgId, QString messageName);
     /** @brief Find the child widget item of the msgid */
     QTreeWidgetItem* findChildWidgetForStream(QTreeWidgetItem* parentItem, int msgId);
-
-    void activateStream(QTreeWidgetItem* item, int col);
-    void sendStreamButton(void);
 
     static const unsigned int updateInterval; ///< The update interval of the refresh function
     static const float updateHzLowpass; ///< The low-pass filter value for the frequency of each message

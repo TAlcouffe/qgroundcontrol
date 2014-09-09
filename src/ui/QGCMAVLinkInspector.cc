@@ -58,9 +58,10 @@ QGCMAVLinkInspector::QGCMAVLinkInspector(MAVLinkProtocol* protocol, QWidget *par
     updateTimer.start(updateInterval);
 
     // connect to activate the streams
-    //connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(activateStream(QTreeWidgetItem*,int)));
+    connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(activateStream(QTreeWidgetItem*,int)));
     //connect(ui->treeWidget,SIGNAL(itemChanged(QTreeWidgetItem*,int)),this,SLOT(activateStream(QTreeWidgetItem*,int)));
-    //connect(ui->sendStreamButton,SIGNAL(clicked()),this,SLOT(sendStreamButton()));
+    
+    connect(ui->sendStreamButton,SIGNAL(clicked()),this,SLOT(sendStreamButton()));
 }
 
 void QGCMAVLinkInspector::addSystem(UASInterface* uas)
@@ -224,8 +225,8 @@ void QGCMAVLinkInspector::refreshView()
                 }
 
                 msgTreeItems->insert(msg->msgid,widget);
-                //msgUasTreeItems.insert(widget,msg->sysid);
-                //widgetTreeItems.insert(widget,msg->msgid);
+                msgUasTreeItems.insert(widget,msg->sysid);
+                widgetTreeItems.insert(widget,msg->msgid);
 
                 QList<int> groupKeys = msgTreeItems->uniqueKeys();
                 int insertIndex = groupKeys.indexOf(msg->msgid);
@@ -759,7 +760,13 @@ void QGCMAVLinkInspector::activateStream(QTreeWidgetItem* item, int col)
 {
     //Q_UNUSED(col);
 
+    if (col > 0)
+    {
+        return;
+    }
+
     qDebug() << "Checkvalue:" << QString::number(item->checkState(0)) << ", on column:" << QString::number(col);
+    
     QMap<QTreeWidgetItem*, int>::const_iterator it = msgUasTreeItems.constFind(item);
     QMap<QTreeWidgetItem*, int>::const_iterator it2 = widgetTreeItems.constFind(item);
     
@@ -776,7 +783,9 @@ void QGCMAVLinkInspector::activateStream(QTreeWidgetItem* item, int col)
         qDebug() << "Switching on the clicked stream.";
         request_stream.start_stop = 1;
         request_stream.req_message_rate = ui->frequencySpinBox->value();
-    }else{
+    }
+    else
+    {
         qDebug() << "Switching off the clicked stream.";
         request_stream.start_stop = 0;
         request_stream.req_message_rate = 0;
@@ -816,16 +825,19 @@ void QGCMAVLinkInspector::activateStream(QTreeWidgetItem* item, int col)
     uasMsgCount->insert(msgID,(unsigned int) 0);
 }
 
-void QGCMAVLinkInspector::sendStreamButton(void)
+void QGCMAVLinkInspector::sendStreamButton()
 {
-    UASInterface* uas = UASManager::instance()->getActiveUAS();
+    qDebug() << "sendStreamButton";
+
     mavlink_request_data_stream_t request_stream;
     mavlink_message_t msg;
-    request_stream.target_system = uas->getUASID();
-    request_stream.target_component = 0; //TODO: change to uas->getCompenentId();
+
+    request_stream.target_system = selectedSystemID; 
+    request_stream.target_component = 0; 
     request_stream.req_message_rate = 1;
     request_stream.req_stream_id = 255; // request all streams
     request_stream.start_stop = 1;
+
     mavlink_msg_request_data_stream_encode(_protocol->getSystemId(),_protocol->getComponentId(), &msg, &request_stream);
     _protocol->sendMessage(msg);
 }
