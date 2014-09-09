@@ -50,8 +50,11 @@ protected:
     QTimer updateTimer; ///< Only update at 1 Hz to not overload the GUI
     mavlink_message_info_t messageInfo[256]; // Store the metadata for all available MAVLink messages.
 
+    QMap<QTreeWidgetItem*,int> widgetTreeItems;  ///< Available msgid tree items
+
     QMap<int, QTreeWidgetItem* > uasTreeWidgetItems; ///< Tree of available uas with their widget
     QMap<int, QMap<int, QTreeWidgetItem*>* > uasMsgTreeItems; ///< Stores the widget of the received message for each UAS
+    QMap<QTreeWidgetItem*,int> msgUasTreeItems;
 
     QMap<int, mavlink_message_t* > uasMavlinkStorage; ///< Stores the message array for every UAS
     QMap<int, QMap<int, float>* > uasMessageHz; ///< Stores the frequency of each message of each UAS
@@ -65,8 +68,15 @@ protected:
     void rebuildComponentList();
     /** @brief Change the stream interval */
     void changeStreamInterval(int msgid, int interval);
-    /* @brief Create a new tree for a new UAS */
+    /** @brief Create a new tree for a new UAS */
     void addUAStoTree(int sysId);
+    /** @brief Find the parent widget item of the msgid */
+    QTreeWidgetItem* findParentWidgetForStream(int sysId, int msgId, QString messageName);
+    /** @brief Find the child widget item of the msgid */
+    QTreeWidgetItem* findChildWidgetForStream(QTreeWidgetItem* parentItem, int msgId);
+
+    void activateStream(QTreeWidgetItem* item, int col);
+    void sendStreamButton(void);
 
     static const unsigned int updateInterval; ///< The update interval of the refresh function
     static const float updateHzLowpass; ///< The low-pass filter value for the frequency of each message
