@@ -327,6 +327,9 @@ void QGCMAVLinkInspector::receiveMessage(LinkInterface* link,mavlink_message_t m
 
     quint64 receiveTime;
 
+    if (selectedSystemID != 0 && selectedSystemID != message.sysid) return;
+    if (selectedComponentID != 0 && selectedComponentID != message.compid) return;
+
     // Create dynamically a map to store the messages for each UAS
     if (!uasMessageStorage.contains(message.sysid))
     {
