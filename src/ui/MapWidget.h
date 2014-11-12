@@ -35,6 +35,7 @@ This file is part of the QGROUNDCONTROL project
 
 #include <QWidget>
 #include <QMap>
+#include <QList>
 #include "qmapcontrol.h"
 #include "UASInterface.h"
 #include "QPointF"
@@ -124,12 +125,15 @@ protected:
     QMenu* mapMenu;
     QPushButton* mapButton;
 
-    qmapcontrol::MapControl* mc;            ///< QMapControl widget
-    qmapcontrol::MapAdapter* mapadapter;    ///< Adapter to load the map data
-    qmapcontrol::Layer* l;                  ///< Current map layer (background)
-    qmapcontrol::Layer* overlay;            ///< Street overlay (foreground)
-    qmapcontrol::Layer* tracks;             ///< Layer for UAV tracks
-    qmapcontrol::GeometryLayer* geomLayer;  ///< Layer for waypoints
+    qmapcontrol::MapControl* mc;                    ///< QMapControl widget
+    qmapcontrol::MapAdapter* mapadapter;            ///< Adapter to load the map data
+    qmapcontrol::Layer* l;                          ///< Current map layer (background)
+    qmapcontrol::Layer* overlay;                    ///< Street overlay (foreground)
+    qmapcontrol::Layer* tracks;                     ///< Layer for UAV tracks
+
+    ///< Mapping of layers for waypoints with their corresponding UAS ID
+    QMap<int, qmapcontrol::GeometryLayer*> geomLayerMap;
+
 
     //only for experiment
     qmapcontrol::GeometryLayer* camLayer; ///< Layer for camera indicator
