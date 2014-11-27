@@ -251,6 +251,9 @@ void MapWidget::init()
         connect(UASManager::instance(), SIGNAL(UASCreated(UASInterface*)),
                 this, SLOT(addUAS(UASInterface*)));
 
+        connect(UASManager::instance(), SIGNAL(UASDeleted(UASInterface*)),
+                this, SLOT(removeUAS(UASInterface*)));
+
         activeUASSet(UASManager::instance()->getActiveUAS());
         connect(UASManager::instance(), SIGNAL(activeUASSet(UASInterface*)), this, SLOT(activeUASSet(UASInterface*)));
 
@@ -482,8 +485,8 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
                     coordinate.setY(wp->getLatitude());
                     createWaypointGraphAtMap(wpindex, coordinate);
                 } else {
-                    // Waypoint exists, update it if we're not
-                    // currently dragging it with the mouse
+                        // Waypoint exists, update it if we're not
+                        // currently dragging it with the mouse
                     if(!waypointIsDrag) {
                         QPointF coordinate;
                         coordinate.setX(wp->getLongitude());
@@ -659,6 +662,15 @@ void MapWidget::addUAS(UASInterface* uas)
     connect(uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
     connect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
     connect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
+
+    //TODO update 3 maps
+}
+
+void MapWidget::removeUAS(UASInterface* uas)
+{
+    //TODO
+    disconnect
+    update 3 maps
 }
 
 /**
