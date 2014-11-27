@@ -668,9 +668,12 @@ void MapWidget::addUAS(UASInterface* uas)
 
 void MapWidget::removeUAS(UASInterface* uas)
 {
+    disconnect(uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
+    disconnect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
+    disconnect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
+
     //TODO
-    disconnect
-    update 3 maps
+    //update 3 maps
 }
 
 /**
