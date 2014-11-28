@@ -144,8 +144,8 @@ protected:
     QMap<int, qmapcontrol::Point*> uasIcons;
     QMap<int, qmapcontrol::LineString*> uasTrails;
     QMap<int, QPen*> mavPens;
-    QMap<int, QList<qmapcontrol::Point*> > mavWps;
-    QMap<int, qmapcontrol::LineString*> waypointPaths;
+    QMap<int, QList<qmapcontrol::Point*>> uasWps;
+    QMap<int, qmapcontrol::LineString*> uasWaypointPath;
     UASInterface* mav;
     quint64 lastUpdate;
     bool initialized;
@@ -178,7 +178,7 @@ private:
     //QList<qmapcontrol::Point*> wps;
     //QList<Waypoint2DIcon*>wpIcons;
     //qmapcontrol::LineString* waypointPath;
-    QMap <int, QList<Waypoint2DIcon*> > mavWpIcons;
+    QMap <int, QList<Waypoint2DIcon*>> uasWpIcons;
     QPen* pointPen;
     int wpExists(const QPointF coordinate);
     bool waypointIsDrag;
