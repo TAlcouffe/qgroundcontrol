@@ -663,7 +663,11 @@ void MapWidget::addUAS(UASInterface* uas)
     connect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
     connect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
 
-    //TODO update 3 maps
+    connect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
+    connect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
+
+        //TODO update 3 maps
+
 }
 
 void MapWidget::removeUAS(UASInterface* uas)
@@ -671,6 +675,10 @@ void MapWidget::removeUAS(UASInterface* uas)
     disconnect(uas, SIGNAL(globalPositionChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateGlobalPosition(UASInterface*,double,double,double,quint64)));
     disconnect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
     disconnect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
+
+
+    disconnect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
+    disconnect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
 
     //TODO
     //update 3 maps
@@ -747,13 +755,6 @@ void MapWidget::redoWaypoints(int uas)
 
 void MapWidget::activeUASSet(UASInterface* uas)
 {
-    // Disconnect old MAV
-    if (mav) {
-        // Disconnect the waypoint manager / data storage from the UI
-        disconnect(mav->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
-        disconnect(mav->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
-        disconnect(this, SIGNAL(waypointCreated(Waypoint*)), mav->getWaypointManager(), SLOT(addWaypoint(Waypoint*)));
-    }
 
     if (uas && mc) {
         mav = uas;
@@ -762,16 +763,8 @@ void MapWidget::activeUASSet(UASInterface* uas)
         QPen* pen = new QPen(color);
         pen->setWidth(3.0);
         mavPens.insert(mav->getUASID(), pen);
-        // FIXME Remove after refactoring
-        waypointPath->setPen(pen);
 
-        // Delete all waypoints and add waypoint from new system
-        //redoWaypoints();
-        updateWaypointList(uas->getUASID());
-
-        // Connect the waypoint manager / data storage to the UI
-        connect(mav->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
-        connect(mav->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
+        // connects waypoint created to addwaypoint for active uas.
         connect(this, SIGNAL(waypointCreated(Waypoint*)), mav->getWaypointManager(), SLOT(addWaypoint(Waypoint*)));
 
         updateSystemSpecs(mav->getUASID());
