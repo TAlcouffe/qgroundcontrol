@@ -666,7 +666,9 @@ void MapWidget::addUAS(UASInterface* uas)
     connect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     connect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
 
-        //TODO update 3 maps
+    uasWaypointPath.insert(uas->getUASID(), new qmapcontrol::LineString());
+    uasWps.insert(uas->getUASID(), QList<qmapcontrol::Point*>());
+    uasWpIcons.insert(uas->getUASID(), QList<Waypoint2DIcon*>());
 
 }
 
@@ -680,8 +682,9 @@ void MapWidget::removeUAS(UASInterface* uas)
     disconnect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     disconnect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
 
-    //TODO
-    //update 3 maps
+    delete(uasWaypointPath.take(uas->getUASID()));
+    uasWps.remove(uas->getUASID());
+    uasWpIcons.remove(uas->getUASID());
 }
 
 /**
