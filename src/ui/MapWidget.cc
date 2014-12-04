@@ -433,22 +433,7 @@ void MapWidget::captureMapClick(const QMouseEvent* event, const PQointF coordina
                 yaw = mav->getWaypointManager()->getWaypointList().at(wpListCount-1)->getYaw();
             }
             mav->getWaypointManager()->addWaypoint(new Waypoint(wpListCount, coordinate.y(), coordinate.x(), altitude, yaw, true));
-        } else {
-            str = QString("%1").arg(waypointPath->numberOfPoints());
-            tempCirclePoint = new Waypoint2DIcon(coordinate.x(), coordinate.y(), 20, str, qmapcontrol::Point::Middle);
-            wpIcons.append(tempCirclePoint);
-
-            mc->layer("Waypoints")->addGeometry(tempCirclePoint);
-
-            qmapcontrol::Point* tempPoint = new qmapcontrol::Point(coordinate.x(), coordinate.y(),str);
-            //TODO ask Patrick
-            wps.append(tempPoint);
-            waypointPath->addPoint(tempPoint);
-
-            // Refresh the screen
-            if (isVisible()) mc->updateRequest(tempPoint->boundingBox().toRect());
         }
-
         // emit signal mouse was clicked
         //emit captureMapCoordinateClick(coordinate);
     }
