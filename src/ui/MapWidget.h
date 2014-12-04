@@ -162,7 +162,7 @@ protected slots:
     void createPathButtonClicked(bool checked);
 
     /** @brief Create the graphic representation of the waypoint */
-    void createWaypointGraphAtMap(int id, const QPointF coordinate);
+    void createWaypointGraphAtMap(int id, const QPointF coordinate, int uas);
     void mapproviderSelected(QAction* action);
 
 signals:
