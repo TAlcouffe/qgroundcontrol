@@ -533,7 +533,6 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
     }
 }
 
-//TODO also send id of uas in question
 void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate, int uas)
 {
 
@@ -599,7 +598,6 @@ void MapWidget::captureGeometryDrag(Geometry* geom, QPointF coordinate)
 
         // Update waypoint data storage
         if (mav) {
-            //TODO uses local scope
             QVector<Waypoint*> wps = mav->getWaypointManager()->getGlobalFrameAndNavTypeWaypointList();
 
             if (wps.size() > index) {
