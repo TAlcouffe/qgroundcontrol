@@ -467,67 +467,65 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp)
 void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
 {
     if (mc) {
-        // Make sure this is the right UAS
-        if (uas == this->mav->getUASID()) {
-            // Only accept waypoints in global coordinate frame
-            if (wp->getFrame() == MAV_FRAME_GLOBAL && wp->isNavigationType()) {
-                // We're good, this is a global waypoint
+        // Only accept waypoints in global coordinate frame
+        if (wp->getFrame() == MAV_FRAME_GLOBAL && wp->isNavigationType()) {
+            // We're good, this is a global waypoint
 
-                // Get the index of this waypoint
-                // note the call to getGlobalFrameAndNavTypeIndexOf()
-                // as we're only handling global waypoints
-                int wpindex = UASManager::instance()->getUASForId(uas)->getWaypointManager()->getGlobalFrameAndNavTypeIndexOf(wp);
-                // If not found, return (this should never happen, but helps safety)
-                if (wpindex == -1) return;
+            // Get the index of this waypoint
+            // note the call to getGlobalFrameAndNavTypeIndexOf()
+            // as we're only handling global waypoints
+            int wpindex = UASManager::instance()->getUASForId(uas)->getWaypointManager()->getGlobalFrameAndNavTypeIndexOf(wp);
+            // If not found, return (this should never happen, but helps safety)
+            if (wpindex == -1) return;
 
-                // Check if wp exists yet in map
-                if (!(wpIcons.count() > wpindex)) {
-                    // Waypoint is new, a new icon is created
+            // Check if wp exists yet in map
+            //TODO check when is wpIcons added
+            if (!(uasWpIcons.value(uas).count() > wpindex)) {
+                // Waypoint is new, a new icon is created
+                QPointF coordinate;
+                coordinate.setX(wp->getLongitude());
+                coordinate.setY(wp->getLatitude());
+                createWaypointGraphAtMap(wpindex, coordinate);
+            } else {
+                    // Waypoint exists, update it if we're not
+                    // currently dragging it with the mouse
+                if(!waypointIsDrag) {
                     QPointF coordinate;
                     coordinate.setX(wp->getLongitude());
                     coordinate.setY(wp->getLatitude());
-                    createWaypointGraphAtMap(wpindex, coordinate);
-                } else {
-                        // Waypoint exists, update it if we're not
-                        // currently dragging it with the mouse
-                    if(!waypointIsDrag) {
-                        QPointF coordinate;
-                        coordinate.setX(wp->getLongitude());
-                        coordinate.setY(wp->getLatitude());
 
-                        Point* waypoint;
-                        waypoint = wps.at(wpindex);
-                        if (waypoint) {
-                            // First set waypoint coordinate
-                            waypoint->setCoordinate(coordinate);
-                            // Now update icon position
-                            wpIcons.at(wpindex)->setCoordinate(coordinate);
-                            // Update pen
-                            wpIcons.at(wpindex)->setPen(mavPens.value(uas));
-                            // Then waypoint line coordinate
-                            Point* linesegment = NULL;
-                            // If the line segment already exists, just update it
-                            // else create a new one
-                            if (waypointPath->points().size() > wpindex) {
-                                linesegment = waypointPath->points().at(wpindex);
-                                if (linesegment) linesegment->setCoordinate(coordinate);
-                            } else {
-                                waypointPath->addPoint(waypoint);
-                            }
-
-                            // Update view
-                            if (updateView) if (isVisible()) mc->updateRequest(waypoint->boundingBox().toRect());
+                    Point* waypoint;
+                    waypoint = uasWps.value(uas).at(wpindex);
+                    if (waypoint) {
+                        // First set waypoint coordinate
+                        waypoint->setCoordinate(coordinate);
+                        // Now update icon position
+                        uasWpIcons.value(uas).at(wpindex)->setCoordinate(coordinate);
+                        // Update pen
+                        uasWpIcons.value(uas).at(wpindex)->setPen(mavPens.value(uas));
+                        // Then waypoint line coordinate
+                        Point* linesegment = NULL;
+                        // If the line segment already exists, just update it
+                        // else create a new one
+                        if (uasWaypointPath.value(uas)->points().size() > wpindex) {
+                            linesegment = uasWaypointPath.value(uas)->points().at(wpindex);
+                            if (linesegment) linesegment->setCoordinate(coordinate);
+                        } else {
+                            uasWaypointPath.value(uas)->addPoint(waypoint);
                         }
+
+                        // Update view
+                        if (updateView) if (isVisible()) mc->updateRequest(waypoint->boundingBox().toRect());
                     }
                 }
-            } else {
-                // Check if the index of this waypoint is larger than the global
-                // waypoint list. This implies that the coordinate frame of this
-                // waypoint was changed and the list containing only global
-                // waypoints was shortened. Thus update the whole list
-                if (waypointPath->points().count() > UASManager::instance()->getUASForId(uas)->getWaypointManager()->getGlobalFrameAndNavTypeCount()) {
-                    updateWaypointList(uas);
-                }
+            }
+        } else {
+            // Check if the index of this waypoint is larger than the global
+            // waypoint list. This implies that the coordinate frame of this
+            // waypoint was changed and the list containing only global
+            // waypoints was shortened. Thus update the whole list
+            if (uasWaypointPath.value(uas)->points().count() > UASManager::instance()->getUASForId(uas)->getWaypointManager()->getGlobalFrameAndNavTypeCount()) {
+                updateWaypointList(uas);
             }
         }
     }
