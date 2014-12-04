@@ -216,7 +216,9 @@ void MapWidget::init()
         // Configure the WP Path's pen
         pointPen = new QPen(QColor(0, 255,0));
         pointPen->setWidth(3);
+        //TODO use this to initialize all waypointpaths
         waypointPath = new qmapcontrol::LineString (wps, "Waypoint path", pointPen);
+        //TODO check this:
         mc->layer("Waypoints")->addGeometry(waypointPath);
 
         //Camera Control
@@ -413,7 +415,7 @@ void MapWidget::createPathButtonClicked(bool checked)
  * @note  This slot is connected to the mouseEventCoordinate of the QMapControl object
  */
 
-void MapWidget::captureMapClick(const QMouseEvent* event, const QPointF coordinate)
+void MapWidget::captureMapClick(const QMouseEvent* event, const PQointF coordinate)
 {
     if (QEvent::MouseButtonRelease == event->type() && createPath->isChecked()) {
         // Create waypoint name
@@ -439,6 +441,7 @@ void MapWidget::captureMapClick(const QMouseEvent* event, const QPointF coordina
             mc->layer("Waypoints")->addGeometry(tempCirclePoint);
 
             qmapcontrol::Point* tempPoint = new qmapcontrol::Point(coordinate.x(), coordinate.y(),str);
+            //TODO ask Patrick
             wps.append(tempPoint);
             waypointPath->addPoint(tempPoint);
 
@@ -530,6 +533,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
     }
 }
 
+//TODO also send id of uas in question
 void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate)
 {
     //if (!wpExists(coordinate))
@@ -570,6 +574,7 @@ void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate)
     //    emit captureMapCoordinateClick(coordinate);
 }
 
+//TODO apparently this function isn't in use.
 int MapWidget::wpExists(const QPointF coordinate)
 {
     if (mc) {
@@ -592,6 +597,7 @@ void MapWidget::captureGeometryClick(Geometry* geom, QPoint point)
     if (mc) mc->setMouseMode(qmapcontrol::MapControl::None);
 }
 
+//see if we can get uas id from geometry
 void MapWidget::captureGeometryDrag(Geometry* geom, QPointF coordinate)
 {
     waypointIsDrag = true;
@@ -615,6 +621,7 @@ void MapWidget::captureGeometryDrag(Geometry* geom, QPointF coordinate)
 
         // Update waypoint data storage
         if (mav) {
+            //TODO ask patrick
             QVector<Waypoint*> wps = mav->getWaypointManager()->getGlobalFrameAndNavTypeWaypointList();
 
             if (wps.size() > index) {
@@ -678,6 +685,8 @@ void MapWidget::removeUAS(UASInterface* uas)
     disconnect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
     disconnect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
 
+    //TODO check if icon is deleted
+
 
     disconnect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     disconnect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
@@ -700,7 +709,7 @@ void MapWidget::updateWaypointList(int uas)
         if (uasInstance) {
             // Get update rect of old content, this is what will be redrawn
             // in the last step
-            QRect updateRect = waypointPath->boundingBox().toRect();
+            QRect updateRect = uasWaypointPath.value(uas)->boundingBox().toRect();
 
             // Get all waypoints, including non-global waypoints
             QVector<Waypoint*> wpList = uasInstance->getWaypointManager()->getWaypointList();
@@ -712,16 +721,16 @@ void MapWidget::updateWaypointList(int uas)
             }
 
             // Trim internal list to number of global waypoints in the waypoint manager list
-            int overSize = waypointPath->points().count() - uasInstance->getWaypointManager()->getGlobalFrameAndNavTypeCount();
+            int overSize = uasWaypointPath.value(uas)->points().count() - uasInstance->getWaypointManager()->getGlobalFrameAndNavTypeCount();
             if (overSize > 0) {
                 // Remove n waypoints at the end of the list
                 // the remaining waypoints will be updated
                 // in the next step
                 for (int i = 0; i < overSize; ++i) {
-                    wps.removeLast();
-                    mc->layer("Waypoints")->removeGeometry(wpIcons.last());
-                    wpIcons.removeLast();
-                    waypointPath->points().removeLast();
+                    uasWps.value(uas).removeLast();
+                    mc->layer("Waypoints")->removeGeometry(uasWpIcons.value(uas).last());
+                    uasWpIcons.value(uas).removeLast();
+                    uasWaypointPath.value(uas)->points().removeLast();
                 }
             }
 
@@ -730,7 +739,7 @@ void MapWidget::updateWaypointList(int uas)
                 // Block map draw updates, since we update everything in the next step
                 // but update internal data structures.
                 // Please note that updateWaypoint() ignores non-global waypoints
-                updateWaypoint(mav->getUASID(), wp, false);
+                updateWaypoint(uas, wp, false);
             }
 
             // Update view
