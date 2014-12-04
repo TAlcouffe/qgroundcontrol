@@ -467,7 +467,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp)
 void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
 {
     if (mc) {
-        if(UASManager::instance()->getUASForId(uas))
+        if(UASManager::instance()->getUASForId(uas)) {
             // Only accept waypoints in global coordinate frame
             if (wp->getFrame() == MAV_FRAME_GLOBAL && wp->isNavigationType()) {
                 // We're good, this is a global waypoint
@@ -479,12 +479,13 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
                 // If not found, return (this should never happen, but helps safety)
                 if (wpindex == -1) return;
 
-                // Check if wp exists yet in map
+                // Check if WpIcon exists yet in map
                 if (!(uasWpIcons.value(uas).count() > wpindex)) {
                     // Waypoint is new, a new icon is created
                     QPointF coordinate;
                     coordinate.setX(wp->getLongitude());
                     coordinate.setY(wp->getLatitude());
+                    //creates new WpIcon
                     createWaypointGraphAtMap(wpindex, coordinate, uas);
                 } else {
                         // Waypoint exists, update it if we're not
@@ -529,6 +530,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
                 }
             }
         }
+    }
 }
 
 //TODO also send id of uas in question
