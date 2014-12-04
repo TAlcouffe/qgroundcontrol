@@ -529,7 +529,7 @@ void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate, int u
     Waypoint2DIcon* tempCirclePoint;
 
     if (UASManager::instance()->getUASForId(uas)) {
-        str = QString("%1").arg(id);
+        str = QString("%1 %2").arg(uas).arg(id);
         qDebug() << "Waypoint list count:" << str;
         tempCirclePoint = new Waypoint2DIcon(coordinate.x(), coordinate.y(), 20, str, qmapcontrol::Point::Middle, mavPens.value(uas));
 
@@ -570,26 +570,35 @@ void MapWidget::captureGeometryDrag(Geometry* geom, QPointF coordinate)
     int temp = 0;
 
     // Get waypoint index in list
-    bool wpIndexOk;
-    int index = geom->name().toInt(&wpIndexOk);
+    bool wpUasOk, wpIndexOk;
+    int uas = 0, index = 0;
+    //int index = geom->name().toInt(&wpIndexOk);
+    QStringList uas_and_index = geom->name().split(" ");
+    if (uas_and_index.size() != 2) {
+        wpUasOk = false;
+        wpIndexOk = false;
+    } else {
+        uas = uas_and_index[0].toInt(&wpUasOk);
+        index = uas_and_index[1].toInt(&wpIndexOk);
+    }
 
     Waypoint2DIcon* point2Find = dynamic_cast <Waypoint2DIcon*> (geom);
 
-    if (wpIndexOk && point2Find && wps.count() > index) {
+    if (wpIndexOk && wpUasOk && point2Find && uasWps.value(uas).count() > index) {
         // Update visual
         point2Find->setCoordinate(coordinate);
-        waypointPath->points().at(index)->setCoordinate(coordinate);
-        if (isVisible()) mc->updateRequest(waypointPath->boundingBox().toRect());
+        uasWaypointPath.value(uas)->points().at(index)->setCoordinate(coordinate);
+        if (isVisible()) mc->updateRequest(uasWaypointPath.value(uas)->boundingBox().toRect());
 
         // Update waypoint data storage
-        if (mav) {
-            QVector<Waypoint*> wps = mav->getWaypointManager()->getGlobalFrameAndNavTypeWaypointList();
+        if(UASManager::instance()->getUASForId(uas)) {
+            QVector<Waypoint*> wps = UASManager::instance()->getUASForId(uas)->getWaypointManager()->getGlobalFrameAndNavTypeWaypointList();
 
             if (wps.size() > index) {
                 Waypoint* wp = wps.at(index);
                 wp->setLatitude(coordinate.y());
                 wp->setLongitude(coordinate.x());
-                mav->getWaypointManager()->notifyOfChange(wp);
+                UASManager::instance()->getUASForId(uas)->getWaypointManager()->notifyOfChange(wp);
             }
         }
 
