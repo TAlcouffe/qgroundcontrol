@@ -683,15 +683,14 @@ void MapWidget::removeUAS(UASInterface* uas)
     disconnect(uas, SIGNAL(attitudeChanged(UASInterface*,double,double,double,quint64)), this, SLOT(updateAttitude(UASInterface*,double,double,double,quint64)));
     disconnect(uas, SIGNAL(systemSpecsChanged(int)), this, SLOT(updateSystemSpecs(int)));
 
-    //TODO check if icon is deleted
-
-
     disconnect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     disconnect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
 
     delete(uasWaypointPath.take(uas->getUASID()));
     uasWps.remove(uas->getUASID());
     uasWpIcons.remove(uas->getUASID());
+    uasIcons.remove(uas->getUASID());
+
 }
 
 /**
