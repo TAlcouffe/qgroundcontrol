@@ -180,7 +180,6 @@ private:
     //qmapcontrol::LineString* waypointPath;
     QMap <int, QList<Waypoint2DIcon*>> uasWpIcons;
     QPen* pointPen;
-    int wpExists(const QPointF coordinate);
     bool waypointIsDrag;
 
 

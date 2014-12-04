@@ -536,52 +536,36 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
 //TODO also send id of uas in question
 void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate, int uas)
 {
-    //if (!wpExists(coordinate))
-    {
-        // Create waypoint name
-        QString str;
 
-        // create the WP and set everything in the LineString to display the path
-        //CirclePoint* tempCirclePoint = new CirclePoint(coordinate.x(), coordinate.y(), 10, str);
-        Waypoint2DIcon* tempCirclePoint;
+    // Create waypoint name
+    QString str;
 
-        if (UASManager::instance()->getUASForId(uas)) {
-            str = QString("%1").arg(id);
-            qDebug() << "Waypoint list count:" << str;
-            tempCirclePoint = new Waypoint2DIcon(coordinate.x(), coordinate.y(), 20, str, qmapcontrol::Point::Middle, mavPens.value(uas));
+    // create the WP and set everything in the LineString to display the path
+    //CirclePoint* tempCirclePoint = new CirclePoint(coordinate.x(), coordinate.y(), 10, str);
+    Waypoint2DIcon* tempCirclePoint;
 
-            mc->layer("Waypoints")->addGeometry(tempCirclePoint);
-            uasWpIcons.value(uas).append(tempCirclePoint);
+    if (UASManager::instance()->getUASForId(uas)) {
+        str = QString("%1").arg(id);
+        qDebug() << "Waypoint list count:" << str;
+        tempCirclePoint = new Waypoint2DIcon(coordinate.x(), coordinate.y(), 20, str, qmapcontrol::Point::Middle, mavPens.value(uas));
 
-            Point* tempPoint = new Point(coordinate.x(), coordinate.y(),str);
-            uasWps.value(uas).append(tempPoint);
-            uasWaypointPath.value(uas)->addPoint(tempPoint);
+        mc->layer("Waypoints")->addGeometry(tempCirclePoint);
+        uasWpIcons.value(uas).append(tempCirclePoint);
 
-            //wpIndex.insert(str,tempPoint);
-            qDebug()<<"Funcion createWaypointGraphAtMap WP= "<<str<<" -> x= "<<tempPoint->latitude()<<" y= "<<tempPoint->longitude();
-        }
-            // Refresh the screen
-        if (isVisible()) if (isVisible()) mc->updateRequest(tempPoint->boundingBox().toRect());
+        Point* tempPoint = new Point(coordinate.x(), coordinate.y(),str);
+        uasWps.value(uas).append(tempPoint);
+        uasWaypointPath.value(uas)->addPoint(tempPoint);
+
+        //wpIndex.insert(str,tempPoint);
+        qDebug()<<"Funcion createWaypointGraphAtMap WP= "<<str<<" -> x= "<<tempPoint->latitude()<<" y= "<<tempPoint->longitude();
     }
+        // Refresh the screen
+    if (isVisible()) if (isVisible()) mc->updateRequest(tempPoint->boundingBox().toRect());
+
 
     ////    // emit signal mouse was clicked
     //    emit captureMapCoordinateClick(coordinate);
 }
-
-//TODO apparently this function isn't in use.
-int MapWidget::wpExists(const QPointF coordinate)
-{
-    if (mc) {
-        for (int i = 0; i < wps.size(); i++) {
-            if (wps.at(i)->latitude() == coordinate.y() &&
-                    wps.at(i)->longitude()== coordinate.x()) {
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
-
 
 void MapWidget::captureGeometryClick(Geometry* geom, QPoint point)
 {
