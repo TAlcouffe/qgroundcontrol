@@ -1015,21 +1015,20 @@ void MapWidget::changeEvent(QEvent *e)
 void MapWidget::clearWaypoints(int uas)
 {
     if (mc) {
-        Q_UNUSED(uas);
-        // Clear the previous WP track
+         // Clear the previous WP track
 
         //mc->layer("Waypoints")->clearGeometries();
-        wps.clear();
-        foreach (Point* p, wpIcons) {
+        uasWps.value(uas).clear();
+        foreach (Point* p, uasWpIcons.value(uas)) {
             mc->layer("Waypoints")->removeGeometry(p);
         }
-        wpIcons.clear();
+        uasWpIcons.value(uas).clear();
 
         // Get bounding box of this object BEFORE deleting the content
-        QRect box = waypointPath->boundingBox().toRect();
+        QRect box = uasWaypointPath.value(uas)->boundingBox().toRect();
 
         // Delete the content
-        waypointPath->points().clear();
+        uasWaypointPath.value(uas)->points().clear();
 
         //delete waypointPath;
         //waypointPath = new
