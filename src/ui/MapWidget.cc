@@ -216,10 +216,6 @@ void MapWidget::init()
         // Configure the WP Path's pen
         pointPen = new QPen(QColor(0, 255,0));
         pointPen->setWidth(3);
-        //TODO use this to initialize all waypointpaths
-        waypointPath = new qmapcontrol::LineString (wps, "Waypoint path", pointPen);
-        //TODO check this:
-        mc->layer("Waypoints")->addGeometry(waypointPath);
 
         //Camera Control
         // CAMERA INDICATOR LAYER
@@ -464,7 +460,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
                 // If not found, return (this should never happen, but helps safety)
                 if (wpindex == -1) return;
 
-                // Check if WpIcon exists yet in map
+                // Checks if WpIcon exists yet in map
                 if (!(uasWpIcons.value(uas).count() > wpindex)) {
                     // Waypoint is new, a new icon is created
                     QPointF coordinate;
@@ -643,9 +639,11 @@ void MapWidget::addUAS(UASInterface* uas)
     connect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     connect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
 
-    uasWaypointPath.insert(uas->getUASID(), new qmapcontrol::LineString());
     uasWps.insert(uas->getUASID(), QList<qmapcontrol::Point*>());
     uasWpIcons.insert(uas->getUASID(), QList<Waypoint2DIcon*>());
+    uasWaypointPath.insert(uas->getUASID(), new qmapcontrol::LineString(uasWps.value(uas->getUASID()), QString("Waypoint Path %1").arg(uas->getUASID()), pointPen));
+
+    mc->layer("Waypoints")->addGeometry(uasWaypointPath.value(uas->getUASID()));
 
 }
 
@@ -657,6 +655,8 @@ void MapWidget::removeUAS(UASInterface* uas)
 
     disconnect(uas->getWaypointManager(), SIGNAL(waypointListChanged(int)), this, SLOT(updateWaypointList(int)));
     disconnect(uas->getWaypointManager(), SIGNAL(waypointChanged(int, Waypoint*)), this, SLOT(updateWaypoint(int,Waypoint*)));
+
+    mc->layer("Waypoints")->removeGeometry(uasWaypointPath.value(uas->getUASID()));
 
     delete(uasWaypointPath.take(uas->getUASID()));
     uasWps.remove(uas->getUASID());
@@ -750,7 +750,7 @@ void MapWidget::activeUASSet(UASInterface* uas)
 
         updateSystemSpecs(mav->getUASID());
         updateSelectedSystem(mav->getUASID());
-        mc->updateRequest(waypointPath->boundingBox().toRect());
+        mc->updateRequest(uasWaypointPath.value(mav->getUASID())->boundingBox().toRect());
     }
 }
 
