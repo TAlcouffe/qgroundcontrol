@@ -413,6 +413,7 @@ void MapWidget::createPathButtonClicked(bool checked)
 
 void MapWidget::captureMapClick(const QMouseEvent* event, const PQointF coordinate)
 {
+    qDebug() << "TIB: captureMapClick called";
     if (QEvent::MouseButtonRelease == event->type() && createPath->isChecked()) {
         // Create waypoint name
         QString str;
@@ -427,6 +428,7 @@ void MapWidget::captureMapClick(const QMouseEvent* event, const PQointF coordina
             if (wpListCount > 0) {
                 altitude = mav->getWaypointManager()->getWaypointList().at(wpListCount-1)->getAltitude();
                 yaw = mav->getWaypointManager()->getWaypointList().at(wpListCount-1)->getYaw();
+                qDebug() << "TIB: captureMapClick - mav true";
             }
             mav->getWaypointManager()->addWaypoint(new Waypoint(wpListCount, coordinate.y(), coordinate.x(), altitude, yaw, true));
         }
@@ -447,6 +449,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp)
  */
 void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
 {
+    qDebug() << "TIB: updateWaypoint called";
     if (mc) {
         if(UASManager::instance()->getUASForId(uas)) {
             // Only accept waypoints in global coordinate frame
@@ -516,7 +519,7 @@ void MapWidget::updateWaypoint(int uas, Waypoint* wp, bool updateView)
 
 void MapWidget::createWaypointGraphAtMap(int id, const QPointF coordinate, int uas)
 {
-
+    qDebug() << "TIB: createWaypointGraphAtMap called";
     // Create waypoint name
     QString str;
 
@@ -645,6 +648,8 @@ void MapWidget::addUAS(UASInterface* uas)
 
     mc->layer("Waypoints")->addGeometry(uasWaypointPath.value(uas->getUASID()));
 
+    qDebug() << "TIB: addUAS called";
+
 }
 
 void MapWidget::removeUAS(UASInterface* uas)
@@ -663,6 +668,7 @@ void MapWidget::removeUAS(UASInterface* uas)
     uasWpIcons.remove(uas->getUASID());
     uasIcons.remove(uas->getUASID());
 
+    qDebug() << "TIB: removeUAS called";
 }
 
 /**
@@ -672,6 +678,7 @@ void MapWidget::removeUAS(UASInterface* uas)
  */
 void MapWidget::updateWaypointList(int uas)
 {
+    qDebug() << "TIB: updateWaypointList called";
     if (mc) {
         // Get already existing waypoints
         UASInterface* uasInstance = UASManager::instance()->getUASForId(uas);
@@ -736,7 +743,7 @@ void MapWidget::redoWaypoints(int uas)
 
 void MapWidget::activeUASSet(UASInterface* uas)
 {
-
+    qDebug() << "TIB: activeUASSet called";
     if (uas && mc) {
         mav = uas;
         QColor color = mav->getColor();
@@ -829,7 +836,7 @@ void MapWidget::updateGlobalPosition(UASInterface* uas, double lat, double lon, 
 
             // Icon
             //QPen* pointpen = new QPen(uasColor);
-            qDebug() << "2D MAP: ADDING" << uas->getUASName() << __FILE__ << __LINE__;
+            bug() << "qDe2D MAP: ADDING" << uas->getUASName() << __FILE__ << __LINE__;
             p = new MAV2DIcon(uas, 68, uas->getSystemType(), uas->getColor(), QString("%1").arg(uas->getUASID()), qmapcontrol::Point::Middle);
             uasIcons.insert(uas->getUASID(), p);
             mc->layer("Waypoints")->addGeometry(p);
@@ -990,6 +997,7 @@ void MapWidget::changeEvent(QEvent *e)
 
 void MapWidget::clearWaypoints(int uas)
 {
+    qDebug() << "TIB: clearWaypoints called";
     if (mc) {
          // Clear the previous WP track
 
